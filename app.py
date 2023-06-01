@@ -1,5 +1,5 @@
-from gtts import gTTs
-from mutagen.mp3 import mp3
+from gtts import gTTS
+from mutagen.mp3 import MP3 
 import base64
 import streamlit as st
 import os
@@ -7,7 +7,7 @@ import openai
 import time
 import whisper
 from streamlit_chat import message
-from steramlit_extras.colored_header import colored_header
+from streamlit_extras.colored_header import colored_header
 from streamlit_extras.add_vertical_space import add_vertical_space
 from audiorecorder import audiorecorder
 from dotenv import load_dotenv
@@ -20,7 +20,8 @@ from langchain.schema import (
     )
 
 # Load Whisper Model
-whisper_model = whisper.load_model("medium")
+model = whisper.load_model("medium")
+
 #This will take some more time to run initially, need to download the model 
 openai.api_key = os.getenv('OPENAI_API_KEY')
 st.set_page_config(page_title="nepaliGPT - A Nepali ChatGPT Streamlit Conversational Bot")
@@ -57,7 +58,7 @@ if len(audio_bytes) > 0:
     st.audio(audio_bytes.tobytes())
     wav_file = open("audio.mp3", "wb")
     wav_file.write(audio_bytes.tobytes())
-    user_input = whisper_model.transcribe(wav_file.name, language='ne')['text']
+    user_input = model.transcribe(wav_file.name, language='ne')['text']
 
 if len(audio_bytes) > 0:
     st.session_state.messages.append(HumanMessage(content=user_input))
@@ -65,7 +66,7 @@ if len(audio_bytes) > 0:
         response = chat(st.session_state.messages)
         print(response.content)
 
-        tts = gTTs(response.content, language='ne')
+        tts = gTTS(response.content, language='ne')
         tts.save('response.mp3')
         aud = MP3('response.mp3')
         autoplay_audio('response.mp3', aud.info.length)
@@ -78,4 +79,3 @@ for i, msg in enumerate(messages[1:]):
     else:
         message(msg.content,is_user=False,key=str(i)+'_ai')
         
-
